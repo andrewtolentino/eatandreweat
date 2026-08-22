@@ -101,14 +101,14 @@ export function WantList({
                   </p>
 
                   <ul className="mt-4 flex flex-wrap gap-1">
-                    <li className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-0.5 text-[11px] text-muted">
+                    <li className="pill">
                       <PinDot state="want" className="size-1.5" />
                       {PIN_LABELS.want}
                     </li>
                     {(place.categories ?? []).map((c) => (
                       <li
                         key={c}
-                        className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted"
+                        className="pill"
                       >
                         {categoryLabel(c)}
                       </li>

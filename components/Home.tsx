@@ -118,7 +118,11 @@ export function Home({ year }: { year: number }) {
   }, [overlay, selectedId, mapExpanded]);
 
   return (
-    <div className="min-h-dvh">
+    // A column at least as tall as the viewport, with the main region growing
+    // to fill it. Without this the footer sits directly under the content and
+    // floats mid-screen whenever there is less than a screenful — which is most
+    // of the time early on, and on the "want to go" tab after a tight filter.
+    <div className="flex min-h-dvh flex-col">
       <SiteHeader
         count={count}
         todo={todo}
@@ -143,7 +147,7 @@ export function Home({ year }: { year: number }) {
         </div>
       )}
 
-      <main className="mx-auto grid max-w-[92rem] gap-8 px-6 py-8 lg:grid-cols-[minmax(0,1fr)_24rem]">
+      <main className="mx-auto grid w-full max-w-[92rem] flex-1 grid-rows-[max-content] gap-8 px-6 py-8 lg:grid-cols-[minmax(0,1fr)_24rem]">
         {/* The map comes first in source order so it lands above the feed on a
             phone — a strip you can glance at — but the grid puts it in the
             right rail from lg up, where the feed is the thing you read. */}
@@ -194,7 +198,7 @@ export function Home({ year }: { year: number }) {
                   onClick={() => setTab(key)}
                   className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                     tab === key
-                      ? "bg-foreground text-background"
+                      ? "bg-accent text-white"
                       : "text-muted hover:bg-surface-hover hover:text-foreground"
                   }`}
                 >

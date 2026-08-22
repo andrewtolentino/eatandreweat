@@ -64,10 +64,10 @@ export function CategoryEditor({
               aria-pressed={on}
               disabled={busy}
               onClick={() => toggle(category)}
-              className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors disabled:opacity-50 ${
+              className={`pill font-medium transition-colors disabled:opacity-50 ${
                 on
-                  ? "border-foreground bg-foreground text-background"
-                  : "border-border text-muted hover:border-foreground hover:text-foreground"
+                  ? "border-accent! bg-accent text-white!"
+                  : "hover:border-accent! hover:text-accent!"
               }`}
             >
               {CATEGORY_LABELS[category]}

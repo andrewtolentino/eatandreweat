@@ -13,7 +13,7 @@ import { Credit } from "./Credit";
  */
 export function SiteFooter({ year }: { year: number }) {
   return (
-    <footer className="mt-12 border-t border-border bg-surface">
+    <footer className="mt-auto border-t border-border bg-surface">
       <div className="flex flex-col gap-3 px-6 py-5 text-xs sm:flex-row sm:items-center sm:justify-between">
         <Credit year={year} />
         <div className="sm:w-44">

@@ -38,12 +38,12 @@ export function CategoryFilter({
             onClick={() => toggle(category)}
             // Dimmed rather than hidden when nothing matches: a chip that
             // disappears as you filter makes the row jump under the cursor.
-            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+            className={`pill font-medium transition-colors ${
               on
-                ? "border-foreground bg-foreground text-background"
+                ? "border-accent! bg-accent text-white!"
                 : count === 0
-                  ? "border-border text-muted/50"
-                  : "border-border text-muted hover:border-foreground hover:text-foreground"
+                  ? "text-muted/50"
+                  : "hover:border-accent! hover:text-accent!"
             }`}
           >
             {CATEGORY_LABELS[category]}

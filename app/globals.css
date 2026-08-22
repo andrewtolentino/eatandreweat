@@ -12,18 +12,23 @@
  * competes with the food on it.
  */
 :root {
-  /* Barely off-white. Pure #fff for the page made the white cards vanish into
-     it; anything warmer than this read as dirty next to a photograph. */
-  --background: #fafaf9;
+  /* Barely off-white, warmed a touch now that the accent is warm — a neutral
+     grey paper under a paprika accent reads as two unrelated palettes. Still
+     light enough that the white cards separate from it. */
+  --background: #faf8f5;
   --surface: #ffffff;
-  --surface-hover: #f3f3f1;
-  --foreground: #1b1b19;
-  --muted: #6e6e68;
-  --border: #e7e7e3;
-  /* Ink, not a hue. Links are underlined rather than coloured, and filled
-     buttons are ink with white text. */
-  --accent: #1b1b19;
-  --accent-strong: #1b1b19;
+  --surface-hover: #f5f1ec;
+  --foreground: #1f1b19;
+  --muted: #6f6862;
+  --border: #e8e2da;
+  /* Paprika. The page was deliberately monochrome for a while and read as
+     clinical next to photographs of food — this is the one warm hue, spent on
+     the things you touch: links, the active tab, section labels, focus rings.
+     It is a cooking colour rather than a UI blue, which is the point. */
+  --accent: #a8442a;
+  /* Deepened for filled buttons, where white sits on top and has to clear
+     4.5:1 — the lighter paprika does not. */
+  --accent-strong: #8c3620;
   /* The one functional exception: error text has to be findable at a glance,
      and grey error text is not. */
   --danger: #a8322a;
@@ -74,6 +79,30 @@ body {
   font-weight: 600;
   letter-spacing: 0.09em;
   text-transform: uppercase;
+  color: var(--accent);
+}
+
+/*
+ * Every chip on the page — verdicts, categories, filters — is this shape.
+ *
+ * The vertical centring is the reason it exists as a class rather than a
+ * repeated string of utilities. Padding alone does not centre text in a pill:
+ * the line box inherits a 1.5 line-height and leaves the glyphs sitting high
+ * inside it, which is visible the moment two chips of different content sit
+ * side by side. A fixed height with leading-none and flex centring puts the
+ * text on the middle axis and keeps every chip exactly the same height.
+ */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 1.5rem;
+  padding-inline: 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  line-height: 1;
+  white-space: nowrap;
   color: var(--muted);
 }
 

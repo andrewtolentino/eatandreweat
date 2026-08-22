@@ -157,7 +157,7 @@ export function PlacePanel({
             {place.categories.map((c) => (
               <li
                 key={c}
-                className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted"
+                className="pill"
               >
                 {categoryLabel(c)}
               </li>

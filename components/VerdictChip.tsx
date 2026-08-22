@@ -14,10 +14,10 @@ import {
  */
 export function VerdictChip({ state }: { state: VerdictState }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-0.5 text-[11px] text-muted">
+    <span className="pill">
       <span
         aria-hidden
-        className="size-1.5 rounded-full"
+        className="size-1.5 shrink-0 rounded-full"
         style={{ backgroundColor: VERDICT_COLORS[state] }}
       />
       {VERDICT_LABELS[state]}

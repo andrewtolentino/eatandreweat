@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { describeError, supabase } from "./supabase";
 import type { Dish, Place } from "./database.types";
-import { dishState, type VerdictState } from "./verdict";
+import { dishState, eatenVerdict, type VerdictState } from "./verdict";
 
 export type DishWithState = Dish & { state: VerdictState };
 
@@ -18,30 +18,49 @@ export type PlaceWithDishes = Place & {
   lastVisit: string | null;
 };
 
-/** One write-up, lifted out of its place so the feed can sort them together. */
+/** One place you have been, as the feed shows it. */
 export type FeedEntry = {
   place: PlaceWithDishes;
-  dish: DishWithState;
+  /** Rolled up from the dishes eaten here. */
+  verdict: VerdictState;
+  /**
+   * The write-ups. Usually one, and then the card is just prose — which is the
+   * point of a place-level card. But a restaurant with two dishes written up
+   * has two opinions, and running them together unlabelled produces a
+   * paragraph that contradicts itself, so the dish name comes back as a
+   * lead-in *only* when there is more than one.
+   */
+  reviews: { dish: string; note: string }[];
+  lastVisit: string | null;
 };
 
 /**
- * The write-ups, newest first — the front page.
+ * The places you have been, newest first — the front page.
  *
- * Only dishes actually eaten: an entry with no visit is a plan, not a post, and
- * belongs on the map rather than in the feed. Undated visits sort to the back
- * rather than being dropped, because "I went but never wrote down when" is
- * still something you went to.
+ * A card per *place*, not per dish. Two dishes at one restaurant were two
+ * entries with identical headings, which read as a bug rather than as detail,
+ * and it made the front page a catalogue of orders instead of a log of places.
+ * What you ordered lives in the write-up, where it reads as a recommendation,
+ * and in the panel, where it is structured.
+ *
+ * Undated visits sort to the back rather than being dropped: "I went but never
+ * wrote down when" is still somewhere you went.
  */
 export function toFeed(places: PlaceWithDishes[]): FeedEntry[] {
   return places
-    .flatMap((place) => place.dishes.map((dish) => ({ place, dish })))
-    .filter(({ dish }) => dish.eaten)
+    .filter((place) => place.been)
+    .map((place) => ({
+      place,
+      verdict: eatenVerdict(place.dishes),
+      reviews: place.dishes
+        .filter((d) => d.eaten && d.note)
+        .map((d) => ({ dish: d.name, note: d.note!.trim() })),
+      lastVisit: place.lastVisit,
+    }))
     .sort((a, b) => {
-      if (a.dish.eaten_on && b.dish.eaten_on) {
-        return b.dish.eaten_on.localeCompare(a.dish.eaten_on);
-      }
-      if (a.dish.eaten_on) return -1;
-      if (b.dish.eaten_on) return 1;
+      if (a.lastVisit && b.lastVisit) return b.lastVisit.localeCompare(a.lastVisit);
+      if (a.lastVisit) return -1;
+      if (b.lastVisit) return 1;
       return a.place.name.localeCompare(b.place.name);
     });
 }

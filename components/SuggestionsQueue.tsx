@@ -158,10 +158,10 @@ function ApproveForm({
                       : [...current, category],
                   )
                 }
-                className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                className={`pill font-medium transition-colors ${
                   on
-                    ? "border-foreground bg-foreground text-background"
-                    : "border-border text-muted hover:border-foreground hover:text-foreground"
+                    ? "border-accent! bg-accent text-white!"
+                    : "hover:border-accent! hover:text-accent!"
                 }`}
               >
                 {CATEGORY_LABELS[category]}

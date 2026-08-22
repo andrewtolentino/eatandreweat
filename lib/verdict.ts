@@ -97,6 +97,24 @@ const RANK: Record<VerdictState, number> = {
  * crosses turns a list of places into a scorecard. That detail stays on the
  * card and in the panel, where you have gone looking for it.
  */
+/**
+ * A place's verdict, rolled up from the dishes actually eaten there.
+ *
+ * The feed is a card per place now rather than per dish, so it needs one answer
+ * where there may be several. "again" wins over "never" on purpose: one great
+ * dish and one bad one is still somewhere worth going — you just order the
+ * right thing, which is what the panel is for.
+ */
+export function eatenVerdict(
+  dishes: { eaten: boolean; again: boolean | null }[],
+): VerdictState {
+  const eaten = dishes.filter((d) => d.eaten);
+  if (eaten.length === 0) return "todo";
+  if (eaten.some((d) => d.again === true)) return "again";
+  if (eaten.some((d) => d.again === false)) return "never";
+  return "unsure";
+}
+
 export type PinState = "been" | "want";
 
 export const PIN_LABELS: Record<PinState, string> = {
