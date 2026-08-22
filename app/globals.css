@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+/*
+ * Clean and near-monochrome on purpose.
+ *
+ * The chrome is off-white paper, hairline borders and near-black ink, and it
+ * stays out of the way. The only colour in the interface is the four verdict
+ * states in lib/verdict.ts — which appear on the map pins and on the badge that
+ * echoes each pin — plus whatever is in the photographs. Everything else that
+ * used to be tinted (the header wash, the green section labels, the coloured
+ * links) has been taken back to ink, because a page with its own palette
+ * competes with the food on it.
+ */
+:root {
+  /* Barely off-white. Pure #fff for the page made the white cards vanish into
+     it; anything warmer than this read as dirty next to a photograph. */
+  --background: #fafaf9;
+  --surface: #ffffff;
+  --surface-hover: #f3f3f1;
+  --foreground: #1b1b19;
+  --muted: #6e6e68;
+  --border: #e7e7e3;
+  /* Ink, not a hue. Links are underlined rather than coloured, and filled
+     buttons are ink with white text. */
+  --accent: #1b1b19;
+  --accent-strong: #1b1b19;
+  /* The one functional exception: error text has to be findable at a glance,
+     and grey error text is not. */
+  --danger: #a8322a;
+
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-danger: var(--danger);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-motley);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+/*
+ * Motley Medium, for headlines only — the wordmark, place names, section
+ * titles. It is the one piece of personality on an otherwise deliberately quiet
+ * page: a little poster-ish, which is the right register for a list of places
+ * you are excited about. Body text stays in Inter.
+ *
+ * Only weight 500 is loaded, so nothing here may ask for bolder — a `font-bold`
+ * on a .display element would get a browser-synthesised fake bold rather than
+ * Motley's own. The fallback is a system sans rather than a serif, so the page
+ * does not reflow into a different voice while the file loads.
+ */
+.display {
+  font-family: var(--font-motley), "Inter", system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.eyebrow {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/*
+ * MapLibre's own chrome is near-white with grey icons, which is close enough to
+ * the page already — these only pull it onto the same border colour and corner
+ * radius as everything else.
+ *
+ * Every selector is deliberately over-specified. maplibre-gl.css is imported
+ * from the map component, which lands *after* this file in the built
+ * stylesheet, so at equal specificity MapLibre wins. Doubling up the class
+ * beats it on specificity, which is steadier than scattering !important.
+ */
+.maplibregl-ctrl.maplibregl-ctrl-group {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgb(43 29 51 / 0.08);
+}
+.maplibregl-ctrl.maplibregl-ctrl-group button {
+  background: transparent;
+}
+.maplibregl-ctrl.maplibregl-ctrl-group button + button {
+  border-top: 1px solid var(--border);
+}
+.maplibregl-ctrl.maplibregl-ctrl-group button:not(:disabled):hover {
+  background: var(--surface-hover);
+}
+/* Three classes deep because the compact variant MapLibre actually renders is
+   itself a two-class rule, `.maplibregl-ctrl-attrib.maplibregl-compact`, which
+   would otherwise tie and win on load order. */
+.maplibregl-map .maplibregl-ctrl.maplibregl-ctrl-attrib {
+  background: rgb(255 255 255 / 0.85);
+  color: var(--muted);
+}
+.maplibregl-map .maplibregl-ctrl.maplibregl-ctrl-attrib a {
+  color: var(--muted);
+}
+
+/*
+ * Food rain. Each drop starts above the viewport and falls past the bottom,
+ * with its own duration so the shower has depth rather than moving as one sheet.
+ */
+.food-drop {
+  position: absolute;
+  top: 0;
+  display: block;
+  font-size: 1.75rem;
+  line-height: 1;
+  animation-name: food-fall;
+  animation-timing-function: cubic-bezier(0.35, 0, 0.7, 1);
+  animation-fill-mode: both;
+}
+
+@keyframes food-fall {
+  0% {
+    transform: translate3d(0, -15vh, 0) rotate(0deg) scale(var(--scale));
+  }
+  100% {
+    transform: translate3d(var(--drift), 115vh, 0) rotate(var(--rot))
+      scale(var(--scale));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .food-drop {
+    animation: none;
+  }
+}
