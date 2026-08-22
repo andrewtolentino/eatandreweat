@@ -65,8 +65,7 @@ export function SuggestForm({ onClose }: { onClose: () => void }) {
           <h2 className="display text-lg">Thanks — got it</h2>
           <p className="mt-1 text-sm text-muted">
             I read every suggestion. If it makes the cut it&rsquo;ll show up on
-            the map as a pin I haven&rsquo;t been to yet, and turn gold once
-            I&rsquo;ve been and would go back.
+            the map as a hollow pin, and fill in once I&rsquo;ve been.
           </p>
         </div>
         <button

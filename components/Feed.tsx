@@ -31,8 +31,8 @@ export function Feed({
       <div className="rounded-xl border border-border bg-surface p-8 text-center">
         <p className="display text-lg">Nothing written up yet</p>
         <p className="mt-1 text-sm text-muted">
-          Everywhere on the map is still on the to-do list. Open one and write it
-          up after you go.
+          Everywhere on the map is still on the to-do list. I&rsquo;ll write them
+          up as I go.
         </p>
       </div>
     );
@@ -45,7 +45,9 @@ export function Feed({
           <article
             onMouseEnter={() => onHover(place.id)}
             onMouseLeave={() => onHover(null)}
-            className={`overflow-hidden rounded-xl border bg-surface transition-shadow ${
+            /* `relative` anchors the heading button's ::after overlay below,
+               which is what makes the whole card tappable. */
+            className={`relative cursor-pointer overflow-hidden rounded-xl border bg-surface transition-shadow ${
               place.id === selectedId
                 ? "border-foreground/30 shadow-md"
                 : "border-border hover:shadow-md"
@@ -68,11 +70,18 @@ export function Feed({
                     {/* The whole card is hoverable for the map link, but only
                         the name is clickable — an article-wide button would
                         swallow the address text selection and the photo. */}
+                    {/* One button, stretched. The ::after covers the whole
+                        card, so tapping anywhere opens the place — but the
+                        button itself is still just the name, which keeps the
+                        accessible name short and avoids nesting controls
+                        inside a giant clickable region. Text stays selectable
+                        because the overlay sits above the card, not over the
+                        text's own layer. */}
                     <button
                       onClick={() => onSelect(place)}
                       onFocus={() => onHover(place.id)}
                       onBlur={() => onHover(null)}
-                      className="text-left hover:underline focus-visible:underline"
+                      className="text-left after:absolute after:inset-0 after:content-[''] hover:underline focus-visible:underline"
                     >
                       {place.name}
                     </button>

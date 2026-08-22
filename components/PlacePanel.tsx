@@ -11,6 +11,7 @@ import { PinDot } from "./PinDot";
 import { CategoryEditor } from "./CategoryEditor";
 import { DishCard } from "./DishCard";
 import { ReportGone } from "./ReportGone";
+import { RemovePlace } from "./RemovePlace";
 
 /**
  * Author-only. Places arrive on the map before you have decided what to order
@@ -101,11 +102,14 @@ export function PlacePanel({
   place,
   onClose,
   onChanged,
+  onRemoved,
 }: {
   place: PlaceWithDishes;
   onClose: () => void;
   /** Refetches the map, so a pin recolours the moment its dish is answered. */
   onChanged: () => void;
+  /** The place is gone — refetch *and* close, since there is nothing to show. */
+  onRemoved: () => void;
 }) {
   const { isAuthor } = useAuth();
 
@@ -209,7 +213,13 @@ Nothing picked yet — this one made the map on reputation alone.
         )}
       </div>
 
-      <ReportGone place={place} />
+      {/* The author gets the real controls; everyone else gets the report box,
+          which routes to the same decision through the review queue. */}
+      {isAuthor ? (
+        <RemovePlace place={place} onRemoved={onRemoved} />
+      ) : (
+        <ReportGone place={place} />
+      )}
     </aside>
   );
 }

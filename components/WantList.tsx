@@ -41,7 +41,7 @@ export function WantList({
       <div className="rounded-xl border border-border bg-surface p-8 text-center">
         <p className="display text-lg">Nothing left on the list</p>
         <p className="mt-1 text-sm text-muted">
-          Either you have eaten everywhere, or the filters are too tight.
+          Either I&rsquo;ve eaten everywhere, or the filters are too tight.
         </p>
       </div>
     );
@@ -61,7 +61,7 @@ export function WantList({
               <article
                 onMouseEnter={() => onHover(place.id)}
                 onMouseLeave={() => onHover(null)}
-                className={`overflow-hidden rounded-xl border bg-surface transition-shadow ${
+                className={`relative cursor-pointer overflow-hidden rounded-xl border bg-surface transition-shadow ${
                   place.id === selectedId
                     ? "border-foreground/30 shadow-md"
                     : "border-border hover:shadow-md"
@@ -69,11 +69,13 @@ export function WantList({
               >
                 <div className="p-5">
                   <h3 className="display text-xl leading-tight">
+                    {/* Stretched via ::after so the whole card is the hit
+                        area — see the note in Feed. */}
                     <button
                       onClick={() => onSelect(place)}
                       onFocus={() => onHover(place.id)}
                       onBlur={() => onHover(null)}
-                      className="text-left hover:underline focus-visible:underline"
+                      className="text-left after:absolute after:inset-0 after:content-[''] hover:underline focus-visible:underline"
                     >
                       {place.name}
                     </button>

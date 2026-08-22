@@ -59,7 +59,7 @@ export function ReportGone({ place }: { place: PlaceWithDishes }) {
         onClick={() => setOpen(true)}
         className="mt-4 text-xs text-muted underline underline-offset-2 hover:text-foreground"
       >
-        Closed, or not on the menu any more? Let us know
+        Closed, or not on the menu any more? Let me know
       </button>
     );
   }

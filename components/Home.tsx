@@ -288,6 +288,10 @@ export function Home({ year }: { year: number }) {
             place={selected}
             onClose={() => setSelectedId(null)}
             onChanged={reload}
+            onRemoved={() => {
+              setSelectedId(null);
+              reload();
+            }}
           />
         </>
       )}
