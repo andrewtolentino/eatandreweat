@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { geocode, type GeocodeHit } from "@/lib/geocode";
+import { useMyLocation } from "@/lib/useMyLocation";
 
 /**
  * "I know the name, find me the rest."
@@ -14,36 +15,55 @@ export function LocationLookup({
   query,
   onPick,
   hint,
+  /** Offer a "near me" search. On for adding somewhere you are standing in. */
+  offerNearby = false,
 }: {
   /** What to search for. Empty disables the button. */
   query: string;
   onPick: (hit: GeocodeHit) => void;
   hint?: string;
+  offerNearby?: boolean;
 }) {
   const [hits, setHits] = useState<GeocodeHit[] | null>(null);
   const [busy, setBusy] = useState(false);
+  const { locate, busy: locating, error: locationError } = useMyLocation();
 
-  async function look() {
+  async function look(useLocation: boolean) {
     setBusy(true);
     setHits(null);
-    const found = await geocode(query.trim());
+    // A denied or failed lookup returns null and the search simply runs
+    // unbounded, which is the old behaviour rather than a dead end.
+    const near = useLocation ? ((await locate()) ?? undefined) : undefined;
+    const found = await geocode(query.trim(), { near });
     setBusy(false);
     setHits(found);
   }
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        {offerNearby && (
+          <button
+            type="button"
+            onClick={() => look(true)}
+            disabled={busy || locating || !query.trim()}
+            className="rounded-lg border border-accent px-3 py-1.5 text-xs font-medium text-accent hover:bg-surface-hover disabled:opacity-50"
+          >
+            {locating ? "Locating…" : busy ? "Looking…" : "Find near me"}
+          </button>
+        )}
         <button
           type="button"
-          onClick={look}
-          disabled={busy || !query.trim()}
+          onClick={() => look(false)}
+          disabled={busy || locating || !query.trim()}
           className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-surface-hover disabled:opacity-50"
         >
-          {busy ? "Looking…" : "Find the address"}
+          {busy && !locating ? "Looking…" : "Search everywhere"}
         </button>
         {hint && <span className="text-xs text-muted">{hint}</span>}
       </div>
+
+      {locationError && <p className="text-xs text-muted">{locationError}</p>}
 
       {hits?.length === 0 && (
         <p className="text-xs text-muted">

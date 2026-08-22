@@ -61,17 +61,30 @@ function toHit(result: NominatimResult): GeocodeHit {
  *
  * Returns several candidates rather than one, because "Tartine" matches a
  * bakery in San Francisco and a café in Paris, and picking the first silently
- * would put your morning bun on the wrong continent.
+ * would put your morning bun on the wrong continent. Pass `near` to bias the
+ * search to where you are standing, which mostly settles that on its own.
  */
 export async function geocode(
   query: string,
-  limit = 5,
+  { near, limit = 5 }: { near?: { lat: number; lng: number }; limit?: number } = {},
 ): Promise<GeocodeHit[]> {
   const url = new URL("https://nominatim.openstreetmap.org/search");
   url.searchParams.set("q", query);
   url.searchParams.set("format", "json");
   url.searchParams.set("addressdetails", "1");
   url.searchParams.set("limit", String(limit));
+
+  if (near) {
+    // Bounded to roughly 5km around you. Standing outside a place called
+    // "Sunrise" and searching the whole planet is useless; searching the
+    // neighbourhood you are standing in finds it first time.
+    const d = 0.05;
+    url.searchParams.set(
+      "viewbox",
+      [near.lng - d, near.lat + d, near.lng + d, near.lat - d].join(","),
+    );
+    url.searchParams.set("bounded", "1");
+  }
 
   try {
     const response = await fetch(url, { headers: { Accept: "application/json" } });

@@ -75,9 +75,12 @@ drop table if exists dishes;
 -- ---------------------------------------------------------------------------
 -- Storage
 --
--- The bucket was named for dishes. Renaming is free right now because it is
--- empty; the delete below fails loudly rather than silently orphaning anything
--- if that stops being true.
+-- The bucket was named for dishes. A new one is created and the policies move
+-- across; the old bucket is left in place because Supabase forbids deleting
+-- buckets from SQL — storage.protect_delete() raises 42501 on any direct
+-- delete, to stop a stray statement orphaning objects. Remove the empty
+-- dish-photos bucket from Storage in the dashboard if you want it gone; the
+-- app no longer references it either way.
 -- ---------------------------------------------------------------------------
 
 insert into storage.buckets (id, name, public)
@@ -107,5 +110,3 @@ drop policy if exists "dish photos are public" on storage.objects;
 drop policy if exists "author uploads dish photos" on storage.objects;
 drop policy if exists "author replaces dish photos" on storage.objects;
 drop policy if exists "author deletes dish photos" on storage.objects;
-
-delete from storage.buckets where id = 'dish-photos';

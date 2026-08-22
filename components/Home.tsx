@@ -17,6 +17,7 @@ import { PlaceList } from "./PlaceList";
 import { PlacePanel } from "./PlacePanel";
 import { SuggestForm } from "./SuggestForm";
 import { SuggestionsQueue } from "./SuggestionsQueue";
+import { QuickAdd } from "./QuickAdd";
 
 /** Two states, so the key is two swatches. */
 const LEGEND: PinState[] = ["been", "want"];
@@ -66,7 +67,7 @@ export function Home({ year }: { year: number }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoverId, setHover] = useSettledHover();
   const [mapExpanded, setMapExpanded] = useState(false);
-  const [overlay, setOverlay] = useState<null | "suggest" | "queue">(null);
+  const [overlay, setOverlay] = useState<null | "suggest" | "queue" | "add">(null);
 
   // Held by id rather than by object: reload() builds fresh place objects, and
   // a drawer holding the old one would keep showing a stale write-up after an
@@ -128,6 +129,7 @@ export function Home({ year }: { year: number }) {
         todo={todo}
         loading={loading}
         isAuthor={isAuthor}
+        onAdd={() => setOverlay("add")}
         onSuggest={() => setOverlay("suggest")}
         onReview={() => setOverlay("queue")}
       />
@@ -308,7 +310,19 @@ export function Home({ year }: { year: number }) {
             className="absolute inset-0 bg-foreground/25"
           />
           <div className="relative max-h-[85svh] w-full overflow-y-auto rounded-t-2xl border border-border bg-surface p-5 shadow-xl sm:max-w-md sm:rounded-2xl">
-            {overlay === "suggest" ? (
+            {overlay === "add" ? (
+              <QuickAdd
+                onClose={() => setOverlay(null)}
+                onAdded={async (placeId) => {
+                  setOverlay(null);
+                  // Reload first, then select — the panel reads from `places`,
+                  // so selecting an id that is not in the list yet would open
+                  // nothing.
+                  await reload();
+                  setSelectedId(placeId);
+                }}
+              />
+            ) : overlay === "suggest" ? (
               <SuggestForm onClose={() => setOverlay(null)} />
             ) : (
               <SuggestionsQueue

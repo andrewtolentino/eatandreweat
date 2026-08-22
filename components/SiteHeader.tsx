@@ -8,6 +8,7 @@ export function SiteHeader({
   todo,
   loading,
   isAuthor,
+  onAdd,
   onSuggest,
   onReview,
 }: {
@@ -15,6 +16,7 @@ export function SiteHeader({
   todo: number;
   loading: boolean;
   isAuthor: boolean;
+  onAdd: () => void;
   onSuggest: () => void;
   onReview: () => void;
 }) {
@@ -40,7 +42,17 @@ export function SiteHeader({
           </p>
         </div>
 
-        <div className="flex shrink-0 gap-2">
+        <div className="flex shrink-0 flex-wrap gap-2">
+          {/* Filled, and first: for the author this is the action, and the
+              moment it matters is standing outside somewhere with a phone. */}
+          {isAuthor && (
+            <button
+              onClick={onAdd}
+              className="rounded-lg bg-accent-strong px-3 py-2 text-xs font-semibold text-white hover:bg-accent"
+            >
+              + Add a place
+            </button>
+          )}
           <button
             onClick={onSuggest}
             className="rounded-lg border border-border px-3 py-2 text-xs font-medium hover:bg-surface-hover"
