@@ -22,7 +22,7 @@ function ApproveForm({
   onCancel: () => void;
 }) {
   const [name, setName] = useState(suggestion.name);
-  const [dish, setDish] = useState(suggestion.dish ?? "");
+  const [toOrder, setToOrder] = useState(suggestion.dish ?? "");
   const [address, setAddress] = useState(suggestion.address ?? "");
   const [city, setCity] = useState(suggestion.city ?? "");
   const [neighborhood, setNeighborhood] = useState("");
@@ -59,6 +59,8 @@ function ApproveForm({
         neighborhood: neighborhood.trim() || null,
         country: country.trim() || null,
         categories,
+        // Straight onto the place now — what to get is a field, not a row.
+        to_order: toOrder.trim() || null,
         lat: latitude,
         lng: longitude,
       })
@@ -69,21 +71,6 @@ function ApproveForm({
       setSaving(false);
       setError(placeError?.message ?? "Could not create the place.");
       return;
-    }
-
-    // A dish is optional here: half the original sheet was places with nothing
-    // decided yet, and refusing to add one until the order is picked would lose
-    // the tip. It can be added from the place panel later.
-    if (dish.trim()) {
-      const { error: dishError } = await supabase
-        .from("dishes")
-        .insert({ place_id: place.id, name: dish.trim() });
-
-      if (dishError) {
-        setSaving(false);
-        setError(`Place added, but its dish failed: ${dishError.message}`);
-        return;
-      }
     }
 
     await supabase
@@ -104,9 +91,13 @@ function ApproveForm({
 
       <div className="flex flex-col gap-1">
         <label className="text-xs font-medium">
-          Dish <span className="text-muted">(optional)</span>
+          What to get <span className="text-muted">(optional)</span>
         </label>
-        <input value={dish} onChange={(e) => setDish(e.target.value)} className={FIELD} />
+        <input
+          value={toOrder}
+          onChange={(e) => setToOrder(e.target.value)}
+          className={FIELD}
+        />
       </div>
 
       <div className="flex flex-col gap-1">
@@ -284,7 +275,7 @@ export function SuggestionsQueue({
             )}
             <p className="font-medium">{suggestion.name}</p>
             {suggestion.dish && (
-              <p className="text-sm text-muted">Order: {suggestion.dish}</p>
+              <p className="text-sm text-muted">Get: {suggestion.dish}</p>
             )}
             <p className="text-xs text-muted">
               {[suggestion.address, suggestion.city].filter(Boolean).join(" · ") ||

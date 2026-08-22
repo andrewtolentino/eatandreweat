@@ -2,26 +2,9 @@
 
 import { placeWhere } from "@/lib/database.types";
 import { categoryLabel } from "@/lib/categories";
-import type { PlaceWithDishes } from "@/lib/usePlaces";
+import type { PlaceWithVerdict } from "@/lib/usePlaces";
 import { PIN_LABELS } from "@/lib/verdict";
 import { PinDot } from "./PinDot";
-
-/**
- * Everywhere with something left to try.
- *
- * Not simply "places I haven't been": a restaurant where one dish is written up
- * and another is still on the list belongs here too, because there is still a
- * reason to go. That is why this looks at the dishes rather than at the place's
- * rolled-up state, which reports its *best* dish and would hide those.
- */
-export function wantToGo(places: PlaceWithDishes[]): PlaceWithDishes[] {
-  return places
-    .filter(
-      (place) =>
-        place.dishes.length === 0 || place.dishes.some((dish) => !dish.eaten),
-    )
-    .sort((a, b) => a.name.localeCompare(b.name));
-}
 
 export function WantList({
   places,
@@ -30,9 +13,9 @@ export function WantList({
   onHover,
   onSuggest,
 }: {
-  places: PlaceWithDishes[];
+  places: PlaceWithVerdict[];
   selectedId: string | null;
-  onSelect: (place: PlaceWithDishes) => void;
+  onSelect: (place: PlaceWithVerdict) => void;
   onHover: (placeId: string | null) => void;
   onSuggest: () => void;
 }) {
@@ -55,7 +38,6 @@ export function WantList({
           switching between two different interfaces. */}
       <ol className="flex flex-col gap-4">
         {places.map((place) => {
-          const outstanding = place.dishes.filter((d) => !d.eaten);
           return (
             <li key={place.id}>
               <article
@@ -86,12 +68,10 @@ export function WantList({
                   )}
 
                   <p className="mt-4 text-sm">
-                    {outstanding.length > 0 ? (
+                    {place.to_order ? (
                       <>
-                        <span className="text-muted">Order: </span>
-                        <span className="font-medium">
-                          {outstanding.map((d) => d.name).join(", ")}
-                        </span>
+                        <span className="text-muted">Get: </span>
+                        <span className="font-medium">{place.to_order}</span>
                       </>
                     ) : (
                       <span className="text-muted">

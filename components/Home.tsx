@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { toFeed, usePlaces, type PlaceWithDishes } from "@/lib/usePlaces";
+import { toFeed, usePlaces, wantToGo, type PlaceWithVerdict } from "@/lib/usePlaces";
 import { CATEGORIES, matchesCategories } from "@/lib/categories";
 import { useAuth } from "@/lib/useAuth";
 import { PIN_LABELS, type PinState } from "@/lib/verdict";
@@ -11,7 +11,7 @@ import { SiteHeader } from "./SiteHeader";
 import { SiteFooter } from "./SiteFooter";
 import { Feed } from "./Feed";
 import { CategoryFilter } from "./CategoryFilter";
-import { WantList, wantToGo } from "./WantList";
+import { WantList } from "./WantList";
 import { MapPanel } from "./MapPanel";
 import { PlaceList } from "./PlaceList";
 import { PlacePanel } from "./PlacePanel";
@@ -101,7 +101,7 @@ export function Home({ year }: { year: number }) {
   const count = places?.length ?? 0;
   const todo = places?.filter((p) => !p.been).length ?? 0;
 
-  const select = useCallback((place: PlaceWithDishes) => {
+  const select = useCallback((place: PlaceWithVerdict) => {
     setSelectedId(place.id);
   }, []);
 

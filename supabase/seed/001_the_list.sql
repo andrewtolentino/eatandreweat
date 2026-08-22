@@ -62,8 +62,9 @@ on conflict (slug) do nothing;
 -- up, or leave them off — the field is optional.
 -- ---------------------------------------------------------------------------
 
-insert into dishes (place_id, name, eaten, again)
-select p.id, d.name, d.eaten, d.again
+-- Runs after 0002, so "what to get" is a column on the place rather than rows
+-- in a dishes table.
+update places p set to_order = d.name, been = d.been, again = d.again
 from (values
   ('toyose',          'Wings',                      true,  true),
   ('fuddruckers',     'Cheese sauce ON EVERYTHING', true,  true),
@@ -76,13 +77,10 @@ from (values
   ('yamadaya',        'Ramen',                      false, null),
   ('waraku',          'Ramen',                      false, null),
   ('taco-bell',       'Doritos Locos',              false, null),
-  -- The reason dishes are their own table.
-  ('kfc',             'Pot Pie',                    false, null),
-  ('kfc',             'Double Down',                false, null),
+  ('kfc',             'Pot Pie, and the Double Down for the bit', false, null),
   ('double-decker',   'Wings',                      false, null)
-) as d(slug, name, eaten, again)
-join places p on p.slug = d.slug
-on conflict (place_id, name) do nothing;
+) as d(slug, name, been, again)
+where p.slug = d.slug;
 
 -- Popeyes is deliberately dishless. The sheet has it marked been-and-would-go-
 -- again, but never says what you ordered — and the verdict lives on the dish,
@@ -119,13 +117,11 @@ on conflict (place_id, name) do nothing;
 --   ('farmer-browns',   'Farmer Brown''s',      '25 Mason Street', 'San Francisco', 'Union Square', 'United States', 37.7834959, -122.4092431)
 -- on conflict (slug) do nothing;
 --
--- insert into dishes (place_id, name, eaten, again)
--- select p.id, d.name, d.eaten, d.again
+-- update places p set to_order = d.name, been = d.been, again = d.again
 -- from (values
 --   ('little-sheep',     'Hot pot',                 true,  null),
 --   ('lightning-tavern', 'Wings — 25¢ Wednesdays',  false, null),
 --   ('ssisso',           'Japanese style wings',    false, null),
 --   ('farmer-browns',    'All-you-can-eat brunch',  false, null)
--- ) as d(slug, name, eaten, again)
--- join places p on p.slug = d.slug
--- on conflict (place_id, name) do nothing;
+-- ) as d(slug, name, been, again)
+-- where p.slug = d.slug;

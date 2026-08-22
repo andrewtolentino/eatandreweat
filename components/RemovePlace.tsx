@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { supabase, isPermissionDenied } from "@/lib/supabase";
-import { forgetDishPhoto } from "@/lib/photos";
-import type { PlaceWithDishes } from "@/lib/usePlaces";
+import { forgetPlacePhoto } from "@/lib/photos";
+import type { PlaceWithVerdict } from "@/lib/usePlaces";
 
 /**
  * Author-only. Two ways off the map, because they are genuinely different acts
@@ -15,14 +15,14 @@ import type { PlaceWithDishes } from "@/lib/usePlaces";
  * the right answer for somewhere that closed.
  *
  * Deleting is for mistakes — a duplicate, a wrong pin, somewhere added and
- * thought better of. It takes the dishes and photos with it and cannot be
+ * thought better of. It takes the review and photo with it and cannot be
  * undone from here.
  */
 export function RemovePlace({
   place,
   onRemoved,
 }: {
-  place: PlaceWithDishes;
+  place: PlaceWithVerdict;
   onRemoved: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -30,7 +30,7 @@ export function RemovePlace({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const writeUps = place.dishes.filter((d) => d.eaten).length;
+  const hasReview = Boolean(place.review);
 
   function report(saveError: { code?: string; message: string } | null) {
     setBusy(false);
@@ -58,13 +58,12 @@ export function RemovePlace({
   async function destroy() {
     setBusy(true);
     setError(null);
-    // Dishes go with the place via ON DELETE CASCADE, but storage objects are
-    // outside Postgres and nothing cascades to them — so the photos have to be
-    // swept explicitly, before the rows that name them disappear.
-    const photos = place.dishes.map((d) => d.photo_path);
+    // Storage lives outside Postgres and nothing cascades to it, so the photo
+    // has to be swept explicitly — and only once the row naming it is gone.
+    const photo = place.photo_path;
     const { error } = await supabase.from("places").delete().eq("id", place.id);
     if (report(error)) {
-      photos.forEach(forgetDishPhoto);
+      forgetPlacePhoto(photo);
       onRemoved();
     }
   }
@@ -85,9 +84,7 @@ export function RemovePlace({
       <div>
         <p className="text-xs font-medium">Remove {place.name}</p>
         <p className="mt-1 text-xs text-muted">
-          {writeUps > 0
-            ? `${writeUps} write-up${writeUps === 1 ? "" : "s"} here.`
-            : "Nothing written up here."}
+          {hasReview ? "There's a review here." : "Nothing written up here."}
         </p>
       </div>
 
@@ -116,9 +113,8 @@ export function RemovePlace({
       {confirmDelete ? (
         <div className="rounded-md border border-danger/40 p-2.5">
           <p className="text-xs">
-            Delete permanently? This erases the place, its dishes
-            {writeUps > 0 && ", every write-up"} and any photos. It cannot be
-            undone.
+            Delete permanently? This erases the place
+            {hasReview && ", its review"} and any photo. It cannot be undone.
           </p>
           <div className="mt-2 flex gap-2">
             <button

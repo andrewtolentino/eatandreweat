@@ -68,9 +68,15 @@ export function SignIn() {
 
   if (!open) {
     return (
+      // self-start matters: stacked in the footer's column the button
+      // stretches to full width, and a <button> centres its own text by
+      // default — so "Sign in" ended up floating in the middle of the footer
+      // instead of sitting under the credit line. Shrinking it to its content
+      // makes text-align moot. On sm the row reverts to auto so the
+      // container's items-center still applies.
       <button
         onClick={() => setOpen(true)}
-        className="text-xs text-muted underline decoration-border underline-offset-2 hover:decoration-foreground hover:text-foreground"
+        className="self-start text-xs text-muted underline decoration-border underline-offset-2 hover:decoration-foreground hover:text-foreground sm:self-auto"
       >
         Sign in
       </button>
@@ -78,7 +84,7 @@ export function SignIn() {
   }
 
   return (
-    <form onSubmit={signIn} className="flex flex-col gap-2">
+    <form onSubmit={signIn} className="flex w-full flex-col gap-2 sm:w-56">
       <input
         type="email"
         required

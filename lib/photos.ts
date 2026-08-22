@@ -3,22 +3,22 @@
 import { supabase } from "./supabase";
 import { prepareImage } from "./image";
 
-const BUCKET = "dish-photos";
+const BUCKET = "place-photos";
 
 export function publicPhotoUrl(path: string): string {
   return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
 /** Shrinks the file in the browser, uploads it, and returns its storage path. */
-export async function uploadDishPhoto(
-  dishId: string,
+export async function uploadPlacePhoto(
+  placeId: string,
   file: File,
 ): Promise<{ path: string } | { error: string }> {
   const prepared = await prepareImage(file);
   // Timestamped rather than a stable name per dish: overwriting in place would
   // leave the old image cached at the same public URL, so a replaced photo
   // would keep showing the meal before it.
-  const path = `${dishId}/${Date.now()}.${prepared.ext}`;
+  const path = `${placeId}/${Date.now()}.${prepared.ext}`;
 
   const { error } = await supabase.storage
     .from(BUCKET)
@@ -34,7 +34,7 @@ export async function uploadDishPhoto(
  * stop pointing at this file, so a failed delete leaves an orphan in the bucket
  * rather than a broken image on the page. Not worth failing a save over.
  */
-export function forgetDishPhoto(path: string | null): void {
+export function forgetPlacePhoto(path: string | null): void {
   if (!path) return;
   void supabase.storage.from(BUCKET).remove([path]);
 }

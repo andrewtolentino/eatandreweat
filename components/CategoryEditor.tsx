@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { supabase, isPermissionDenied } from "@/lib/supabase";
 import { CATEGORIES, CATEGORY_LABELS } from "@/lib/categories";
-import type { PlaceWithDishes } from "@/lib/usePlaces";
+import type { PlaceWithVerdict } from "@/lib/usePlaces";
 
 /**
  * Author-only. Categories drive the filter on the front page, so a place with
@@ -17,7 +17,7 @@ export function CategoryEditor({
   place,
   onChanged,
 }: {
-  place: PlaceWithDishes;
+  place: PlaceWithVerdict;
   onChanged: () => void;
 }) {
   const [busy, setBusy] = useState(false);

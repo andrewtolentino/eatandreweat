@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import type { Map as MapLibreMap, Marker } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import type { PlaceWithDishes } from "@/lib/usePlaces";
+import type { PlaceWithVerdict } from "@/lib/usePlaces";
 import { PIN_LABELS } from "@/lib/verdict";
 import { PinDot } from "./PinDot";
 
@@ -21,16 +21,16 @@ const MAP_STYLE = "https://tiles.openfreemap.org/styles/positron";
 // after bundling.
 const WORKER_URL = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/maplibre/maplibre-gl-worker.mjs`;
 
-type Pin = { place: PlaceWithDishes; el: HTMLElement };
+type Pin = { place: PlaceWithVerdict; el: HTMLElement };
 
 function PinButton({
   place,
   active,
   onSelect,
 }: {
-  place: PlaceWithDishes;
+  place: PlaceWithVerdict;
   active: boolean;
-  onSelect: (place: PlaceWithDishes) => void;
+  onSelect: (place: PlaceWithVerdict) => void;
 }) {
   const state = place.been ? "been" : "want";
 
@@ -60,11 +60,11 @@ export function MapPanel({
   expanded = false,
   className = "",
 }: {
-  places: PlaceWithDishes[] | null;
+  places: PlaceWithVerdict[] | null;
   selectedId: string | null;
   /** Hovered in the feed or the list. Flies the map there without selecting. */
   focusId: string | null;
-  onSelect: (place: PlaceWithDishes) => void;
+  onSelect: (place: PlaceWithVerdict) => void;
   expanded?: boolean;
   className?: string;
 }) {

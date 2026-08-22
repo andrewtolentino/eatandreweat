@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import type { PlaceWithDishes } from "@/lib/usePlaces";
+import type { PlaceWithVerdict } from "@/lib/usePlaces";
 
 /**
  * "This isn't there any more." A static list goes stale — menus change, places
@@ -13,7 +13,7 @@ import type { PlaceWithDishes } from "@/lib/usePlaces";
  * it questions whether the pin belongs at all, so it goes to the review queue
  * rather than touching any tally.
  */
-export function ReportGone({ place }: { place: PlaceWithDishes }) {
+export function ReportGone({ place }: { place: PlaceWithVerdict }) {
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);

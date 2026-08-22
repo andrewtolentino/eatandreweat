@@ -4,7 +4,7 @@ import { placeWhere } from "@/lib/database.types";
 import { categoryLabel } from "@/lib/categories";
 import { formatDate } from "@/lib/format";
 import { publicPhotoUrl } from "@/lib/photos";
-import type { FeedEntry, PlaceWithDishes } from "@/lib/usePlaces";
+import type { PlaceWithVerdict } from "@/lib/usePlaces";
 import { VerdictChip } from "./VerdictChip";
 
 /**
@@ -20,9 +20,9 @@ export function Feed({
   onSelect,
   onHover,
 }: {
-  entries: FeedEntry[];
+  entries: PlaceWithVerdict[];
   selectedId: string | null;
-  onSelect: (place: PlaceWithDishes) => void;
+  onSelect: (place: PlaceWithVerdict) => void;
   /** Hovering a card flies the map to it. Null on leave. */
   onHover: (placeId: string | null) => void;
 }) {
@@ -40,11 +40,7 @@ export function Feed({
 
   return (
     <ol className="flex flex-col gap-4">
-      {entries.map(({ place, verdict, reviews, lastVisit }) => {
-        // The first photo anyone attached here. One image per card: this is a
-        // log, not a gallery, and the rest are in the panel.
-        const photo = place.dishes.find((d) => d.photo_path)?.photo_path ?? null;
-
+      {entries.map((place) => {
         return (
           <li key={place.id}>
             <article
@@ -58,10 +54,10 @@ export function Feed({
                   : "border-border hover:shadow-md"
               }`}
             >
-              {photo && (
+              {place.photo_path && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={publicPhotoUrl(photo)}
+                  src={publicPhotoUrl(place.photo_path)}
                   alt={place.name}
                   loading="lazy"
                   className="aspect-[3/2] w-full object-cover"
@@ -85,9 +81,9 @@ export function Feed({
                       {place.name}
                     </button>
                   </h3>
-                  {lastVisit && (
+                  {place.visited_on && (
                     <span className="shrink-0 text-xs text-muted">
-                      {formatDate(lastVisit)}
+                      {formatDate(place.visited_on)}
                     </span>
                   )}
                 </div>
@@ -97,27 +93,26 @@ export function Feed({
                   <p className="text-sm text-muted">{place.address}</p>
                 )}
 
-                {reviews.length === 0 ? (
+                {place.review ? (
+                  <p className="mt-3 leading-relaxed whitespace-pre-line">
+                    {place.review}
+                  </p>
+                ) : (
                   <p className="mt-3 text-sm text-muted italic">
                     Been, not written up yet.
                   </p>
-                ) : (
-                  <div className="mt-3 flex flex-col gap-2">
-                    {reviews.map(({ dish, note }) => (
-                      <p key={dish} className="leading-relaxed whitespace-pre-line">
-                        {/* Named only when there is something to tell apart. */}
-                        {reviews.length > 1 && (
-                          <span className="font-medium">{dish}. </span>
-                        )}
-                        {note}
-                      </p>
-                    ))}
-                  </div>
+                )}
+
+                {place.to_order && (
+                  <p className="mt-3 text-sm">
+                    <span className="text-muted">Get: </span>
+                    <span className="font-medium">{place.to_order}</span>
+                  </p>
                 )}
 
                 <ul className="mt-4 flex flex-wrap gap-1.5">
                   <li>
-                    <VerdictChip state={verdict} />
+                    <VerdictChip state={place.verdict} />
                   </li>
                   {(place.categories ?? []).map((c) => (
                     <li key={c} className="pill">

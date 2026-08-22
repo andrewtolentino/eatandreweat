@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { PlaceWithDishes } from "@/lib/usePlaces";
+import type { PlaceWithVerdict } from "@/lib/usePlaces";
 import { placeWhere } from "@/lib/database.types";
 import { PIN_LABELS } from "@/lib/verdict";
 import { PinDot } from "./PinDot";
@@ -17,11 +17,11 @@ const SORT_LABELS: Record<SortMode, string> = {
 };
 
 /** Been first, then A–Z so the order is stable between renders. */
-function byStateThenName(a: PlaceWithDishes, b: PlaceWithDishes) {
+function byStateThenName(a: PlaceWithVerdict, b: PlaceWithVerdict) {
   return Number(b.been) - Number(a.been) || a.name.localeCompare(b.name);
 }
 
-function matches(place: PlaceWithDishes, query: string): boolean {
+function matches(place: PlaceWithVerdict, query: string): boolean {
   if (!query) return true;
   const haystack = [
     place.name,
@@ -29,9 +29,9 @@ function matches(place: PlaceWithDishes, query: string): boolean {
     place.city,
     place.country,
     place.address,
-    // Searching the dish is the whole point of a list like this — "ramen"
+    // Searching what to get is the whole point of a list like this — "ramen"
     // should find Yamadaya even though the word is nowhere in its name.
-    ...place.dishes.map((d) => d.name),
+    place.to_order,
   ]
     .filter(Boolean)
     .join(" ")
@@ -48,8 +48,8 @@ function matches(place: PlaceWithDishes, query: string): boolean {
  * eaten most is the most useful group to put first, and one-off cities fall to
  * the bottom instead of needing a place in a hardcoded list.
  */
-function groupByCity(places: PlaceWithDishes[]) {
-  const groups = new Map<string, PlaceWithDishes[]>();
+function groupByCity(places: PlaceWithVerdict[]) {
+  const groups = new Map<string, PlaceWithVerdict[]>();
 
   for (const place of places) {
     const key = [place.city, place.country].filter(Boolean).join(", ") ||
@@ -72,12 +72,12 @@ function PlaceRow({
   onSelect,
   onHover,
 }: {
-  place: PlaceWithDishes;
+  place: PlaceWithVerdict;
   selected: boolean;
-  onSelect: (place: PlaceWithDishes) => void;
+  onSelect: (place: PlaceWithVerdict) => void;
   onHover?: (placeId: string | null) => void;
 }) {
-  const dishes = place.dishes.map((d) => d.name).join(", ");
+  const order = place.to_order;
 
   return (
     <li>
@@ -99,7 +99,7 @@ function PlaceRow({
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-medium">{place.name}</span>
           <span className="block truncate text-xs text-muted">
-            {dishes || "Nothing picked yet"}
+            {order || "Nothing picked yet"}
           </span>
           <span className="block truncate text-xs text-muted">
             {placeWhere(place)}
@@ -116,9 +116,9 @@ export function PlaceList({
   onSelect,
   onHover,
 }: {
-  places: PlaceWithDishes[];
+  places: PlaceWithVerdict[];
   selectedId: string | null;
-  onSelect: (place: PlaceWithDishes) => void;
+  onSelect: (place: PlaceWithVerdict) => void;
   onHover?: (placeId: string | null) => void;
 }) {
   const [query, setQuery] = useState("");
@@ -148,8 +148,8 @@ export function PlaceList({
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search places, dishes, cities…"
-          aria-label="Search by place, dish or city"
+          placeholder="Search places, what to get, cities…"
+          aria-label="Search by place, what to get, or city"
           className="h-9 w-full rounded-lg border border-border bg-surface px-3 text-sm outline-none focus:border-accent"
         />
         <select

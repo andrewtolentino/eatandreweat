@@ -16,9 +16,11 @@ export function SiteFooter({ year }: { year: number }) {
     <footer className="mt-auto border-t border-border bg-surface">
       <div className="flex flex-col gap-3 px-6 py-5 text-xs sm:flex-row sm:items-center sm:justify-between">
         <Credit year={year} />
-        <div className="sm:w-44">
-          <SignIn />
-        </div>
+        {/* No fixed width here. A box wide enough for the sign-in *form* left
+            the collapsed "Sign in" link floating in the middle of it, well
+            short of the edge that justify-between had pushed the box to. The
+            form sizes itself instead — see SignIn. */}
+        <SignIn />
       </div>
     </footer>
   );

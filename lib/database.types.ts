@@ -20,28 +20,19 @@ export type Place = {
   country: string | null;
   /** See lib/categories.ts — free text, multiple per place. */
   categories: string[] | null;
+  /** Have I been. */
+  been: boolean;
+  /** null while undecided, which is a real answer and not a missing one. */
+  again: boolean | null;
+  review: string | null;
+  /** What to get. Free text — "the pot pie, and the Double Down for the bit". */
+  to_order: string | null;
+  photo_path: string | null;
+  visited_on: string | null;
   lat: number;
   lng: number;
   website: string | null;
   status: PlaceStatus;
-  created_at: string;
-};
-
-/**
- * Column B and everything that follows from it. One author means the verdict
- * and the write-up belong on the dish itself — there is nobody to attribute
- * them to.
- */
-export type Dish = {
-  id: string;
-  place_id: string;
-  name: string;
-  eaten: boolean;
-  /** null while undecided, which is a real answer and not a missing one. */
-  again: boolean | null;
-  note: string | null;
-  photo_path: string | null;
-  eaten_on: string | null;
   created_at: string;
 };
 
