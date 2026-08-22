@@ -3,6 +3,7 @@
 import { placeWhere } from "@/lib/database.types";
 import { categoryLabel } from "@/lib/categories";
 import type { PlaceWithDishes } from "@/lib/usePlaces";
+import { PIN_LABELS } from "@/lib/verdict";
 import { PinDot } from "./PinDot";
 
 /**
@@ -47,67 +48,76 @@ export function WantList({
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
+    <div className="flex flex-col gap-4">
+      {/* Card per place, matching the feed exactly. The two tabs are the same
+          kind of thing seen at two stages — somewhere you mean to go and
+          somewhere you went — so switching between them should not feel like
+          switching between two different interfaces. */}
+      <ol className="flex flex-col gap-4">
         {places.map((place) => {
           const outstanding = place.dishes.filter((d) => !d.eaten);
           return (
             <li key={place.id}>
-              <button
-                onClick={() => onSelect(place)}
+              <article
                 onMouseEnter={() => onHover(place.id)}
                 onMouseLeave={() => onHover(null)}
-                onFocus={() => onHover(place.id)}
-                onBlur={() => onHover(null)}
-                aria-current={place.id === selectedId ? "true" : undefined}
-                className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors ${
+                className={`overflow-hidden rounded-xl border bg-surface transition-shadow ${
                   place.id === selectedId
-                    ? "bg-surface-hover"
-                    : "hover:bg-surface-hover"
+                    ? "border-foreground/30 shadow-md"
+                    : "border-border hover:shadow-md"
                 }`}
               >
-                <PinDot state="want" className="mt-2 size-3" />
-
-                <span className="min-w-0 flex-1">
-                  <span className="block font-medium">{place.name}</span>
-                  <span className="block text-sm text-muted">
-                    {placeWhere(place)}
-                  </span>
+                <div className="p-5">
+                  <h3 className="display text-xl leading-tight">
+                    <button
+                      onClick={() => onSelect(place)}
+                      onFocus={() => onHover(place.id)}
+                      onBlur={() => onHover(null)}
+                      className="text-left hover:underline focus-visible:underline"
+                    >
+                      {place.name}
+                    </button>
+                  </h3>
+                  <p className="mt-1 text-sm text-muted">{placeWhere(place)}</p>
                   {place.address && (
-                    <span className="block text-sm text-muted">
-                      {place.address}
-                    </span>
+                    <p className="text-sm text-muted">{place.address}</p>
                   )}
-                  <span className="mt-1 block text-sm">
+
+                  <p className="mt-4 text-sm">
                     {outstanding.length > 0 ? (
                       <>
                         <span className="text-muted">Order: </span>
-                        {outstanding.map((d) => d.name).join(", ")}
+                        <span className="font-medium">
+                          {outstanding.map((d) => d.name).join(", ")}
+                        </span>
                       </>
                     ) : (
                       <span className="text-muted">
                         Nothing picked yet — worth a look at the menu
                       </span>
                     )}
-                  </span>
-                  {place.categories && place.categories.length > 0 && (
-                    <span className="mt-1.5 flex flex-wrap gap-1">
-                      {place.categories.map((c) => (
-                        <span
-                          key={c}
-                          className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted"
-                        >
-                          {categoryLabel(c)}
-                        </span>
-                      ))}
-                    </span>
-                  )}
-                </span>
-              </button>
+                  </p>
+
+                  <ul className="mt-4 flex flex-wrap gap-1">
+                    <li className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-0.5 text-[11px] text-muted">
+                      <PinDot state="want" className="size-1.5" />
+                      {PIN_LABELS.want}
+                    </li>
+                    {(place.categories ?? []).map((c) => (
+                      <li
+                        key={c}
+                        className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted"
+                      >
+                        {categoryLabel(c)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </article>
             </li>
           );
         })}
-      </ul>
+      </ol>
 
       <p className="px-1 text-sm text-muted">
         Somewhere missing?{" "}
