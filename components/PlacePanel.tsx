@@ -59,14 +59,14 @@ export function PlacePanel({
         </button>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span className="flex items-center gap-1.5 text-sm text-muted">
-          <PinDot state={place.been ? "been" : "want"} className="size-3" />
+      <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <span className="pill-bare gap-1.5">
+          <PinDot state={place.been ? "been" : "want"} className="size-2.5" />
           {PIN_LABELS[place.been ? "been" : "want"]}
         </span>
         {place.been && <VerdictChip state={place.verdict} />}
         {place.visited_on && (
-          <span className="text-xs text-muted">{formatDate(place.visited_on)}</span>
+          <span className="pill-bare">{formatDate(place.visited_on)}</span>
         )}
       </div>
 

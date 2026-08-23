@@ -82,7 +82,7 @@ export function WantList({
 
                   <ul className="mt-4 flex flex-wrap gap-1">
                     <li className="pill">
-                      <PinDot state="want" className="size-1.5" />
+                      <PinDot state="want" className="size-1.5 shrink-0" />
                       {PIN_LABELS.want}
                     </li>
                     {(place.categories ?? []).map((c) => (

@@ -107,6 +107,26 @@ body {
 }
 
 /*
+ * Text that sits *in* a row of pills — a date, a status label — without being
+ * one. Same box as .pill so the glyphs share its optical centre line, minus the
+ * border, padding and radius.
+ *
+ * Needed for the same reason .pill is: bare text carries a 1.5 line-height and
+ * its own baseline, so next to a fixed-height flex-centred pill it rides a
+ * pixel or two high. align-items:center on the row lines up the *boxes*, not
+ * the glyphs inside them.
+ */
+.pill-bare {
+  display: inline-flex;
+  align-items: center;
+  height: 1.5rem;
+  font-size: 0.6875rem;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--muted);
+}
+
+/*
  * MapLibre's own chrome is near-white with grey icons, which is close enough to
  * the page already — these only pull it onto the same border colour and corner
  * radius as everything else.

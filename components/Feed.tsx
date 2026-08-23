@@ -74,9 +74,11 @@ export function Feed({
                      fixed height keeps the picture generous on a narrow screen
                      and turns it into a banner on a wide one. */
                   /* Full width on top below sm; a fixed-width panel down the
-                     side above it, stretched to whatever height the text
-                     needs. */
-                  className="h-56 w-full object-cover sm:h-auto sm:w-48 sm:shrink-0 sm:self-stretch lg:w-60"
+                     right-hand side above it, stretched to whatever height the
+                     text needs. On the right so that every card — photo or not
+                     — starts its text at the same left edge, which is what
+                     makes a column of them scan as one list. */
+                  className="h-56 w-full object-cover sm:order-last sm:h-auto sm:w-48 sm:shrink-0 sm:self-stretch lg:w-60"
                 />
               )}
 
@@ -119,7 +121,16 @@ export function Feed({
                 )}
 
                 <ul className="mt-4 flex flex-wrap items-center gap-1.5">
-                  <li>
+                  {/* Leading the row rather than pinned to the right: the right
+                      edge belongs to the photo now, and a date floating there
+                      on photo-less cards broke the alignment between them. */}
+                  {place.visited_on && (
+                    <li className="pill-bare">{formatDate(place.visited_on)}</li>
+                  )}
+                  {/* flex, not a bare li: an inline-flex pill inside a block
+                      list item still generates a line box, which adds leading
+                      and drops the glyphs ~1px below its neighbours. */}
+                  <li className="flex">
                     <VerdictChip state={place.verdict} />
                   </li>
                   {(place.categories ?? []).map((c) => (
@@ -127,12 +138,6 @@ export function Feed({
                       {categoryLabel(c)}
                     </li>
                   ))}
-                  {/* Down here now that the thumbnail owns the top-right. */}
-                  {place.visited_on && (
-                    <li className="ml-auto text-xs text-muted">
-                      {formatDate(place.visited_on)}
-                    </li>
-                  )}
                 </ul>
               </div>
             </article>
