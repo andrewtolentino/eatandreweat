@@ -48,7 +48,15 @@ export function Feed({
               onMouseLeave={() => onHover(null)}
               /* `relative` anchors the heading button's ::after overlay below,
                  which is what makes the whole card tappable. */
-              className={`relative cursor-pointer overflow-hidden rounded-xl border bg-surface transition-shadow ${
+              /* Stacked on a phone, side-by-side from sm up. A full-bleed
+                 banner is right when the column is 375px wide and overbearing
+                 when it is 900 — the photo stops being an illustration and
+                 becomes the entire card. Switching the axis keeps the picture
+                 large in both without letting it dominate either.
+
+                 sm:min-h-44 stops a card with a two-line review from rendering
+                 the photo as a letterbox slice. */
+              className={`relative cursor-pointer overflow-hidden rounded-xl border bg-surface transition-shadow sm:flex sm:min-h-44 ${
                 place.id === selectedId
                   ? "border-accent/40 shadow-md"
                   : "border-border hover:shadow-md"
@@ -65,11 +73,14 @@ export function Feed({
                      desktop feed, which pushed the review off the screen. A
                      fixed height keeps the picture generous on a narrow screen
                      and turns it into a banner on a wide one. */
-                  className="h-56 w-full object-cover sm:h-64 lg:h-72"
+                  /* Full width on top below sm; a fixed-width panel down the
+                     side above it, stretched to whatever height the text
+                     needs. */
+                  className="h-56 w-full object-cover sm:h-auto sm:w-48 sm:shrink-0 sm:self-stretch lg:w-60"
                 />
               )}
 
-              <div className="p-5">
+              <div className="min-w-0 p-5 sm:flex-1">
                 <h3 className="display text-xl leading-tight">
                   {/* One button, stretched. The ::after covers the whole card,
                       so tapping anywhere opens the place — but the button
