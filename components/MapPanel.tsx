@@ -110,6 +110,15 @@ export function MapPanel({
         center: [0, 20],
         zoom: 1,
         attributionControl: { compact: true },
+        // Inline, the map sits inside a page that scrolls — and above the feed
+        // on a phone. Without this it eats the scroll: a swipe pans the map and
+        // a wheel zooms it, and the page underneath never moves. Cooperative
+        // gestures let a one-finger swipe and a plain wheel pass through, and
+        // ask for two fingers or ctrl to actually drive the map.
+        //
+        // Off when expanded, where the map *is* the page and asking for a
+        // modifier to pan would just be obstructive.
+        cooperativeGestures: !expanded,
       });
       instance.addControl(
         new maplibregl.NavigationControl({ showCompass: false }),
@@ -126,6 +135,9 @@ export function MapPanel({
       map?.remove();
       mapRef.current = null;
     };
+    // `expanded` is read at construction only — the two instances (inline and
+    // full-screen) are separate mounts, so it never changes under a live map.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // The panel changes size when it expands, and MapLibre sizes its canvas from

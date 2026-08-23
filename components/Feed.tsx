@@ -60,34 +60,31 @@ export function Feed({
                   src={publicPhotoUrl(place.photo_path)}
                   alt={place.name}
                   loading="lazy"
-                  className="aspect-[3/2] w-full object-cover"
+                  /* Height, not aspect ratio. At 3:2 the photo scaled with the
+                     column: right on a phone, and about 460px tall in the
+                     desktop feed, which pushed the review off the screen. A
+                     fixed height keeps the picture generous on a narrow screen
+                     and turns it into a banner on a wide one. */
+                  className="h-56 w-full object-cover sm:h-64 lg:h-72"
                 />
               )}
 
               <div className="p-5">
-                <div className="flex items-baseline justify-between gap-4">
-                  <h3 className="display min-w-0 text-xl leading-tight">
-                    {/* One button, stretched. The ::after covers the whole
-                        card, so tapping anywhere opens the place — but the
-                        button itself is still just the name, which keeps the
-                        accessible name short and avoids nesting controls
-                        inside a giant clickable region. */}
-                    <button
-                      onClick={() => onSelect(place)}
-                      onFocus={() => onHover(place.id)}
-                      onBlur={() => onHover(null)}
-                      className="text-left after:absolute after:inset-0 after:content-[''] hover:text-accent hover:underline focus-visible:underline"
-                    >
-                      {place.name}
-                    </button>
-                  </h3>
-                  {place.visited_on && (
-                    <span className="shrink-0 text-xs text-muted">
-                      {formatDate(place.visited_on)}
-                    </span>
-                  )}
-                </div>
-
+                <h3 className="display text-xl leading-tight">
+                  {/* One button, stretched. The ::after covers the whole card,
+                      so tapping anywhere opens the place — but the button
+                      itself is still just the name, which keeps the accessible
+                      name short and avoids nesting controls inside a giant
+                      clickable region. */}
+                  <button
+                    onClick={() => onSelect(place)}
+                    onFocus={() => onHover(place.id)}
+                    onBlur={() => onHover(null)}
+                    className="text-left after:absolute after:inset-0 after:content-[''] hover:text-accent hover:underline focus-visible:underline"
+                  >
+                    {place.name}
+                  </button>
+                </h3>
                 <p className="mt-1 text-sm text-muted">{placeWhere(place)}</p>
                 {place.address && (
                   <p className="text-sm text-muted">{place.address}</p>
@@ -110,7 +107,7 @@ export function Feed({
                   </p>
                 )}
 
-                <ul className="mt-4 flex flex-wrap gap-1.5">
+                <ul className="mt-4 flex flex-wrap items-center gap-1.5">
                   <li>
                     <VerdictChip state={place.verdict} />
                   </li>
@@ -119,6 +116,12 @@ export function Feed({
                       {categoryLabel(c)}
                     </li>
                   ))}
+                  {/* Down here now that the thumbnail owns the top-right. */}
+                  {place.visited_on && (
+                    <li className="ml-auto text-xs text-muted">
+                      {formatDate(place.visited_on)}
+                    </li>
+                  )}
                 </ul>
               </div>
             </article>
