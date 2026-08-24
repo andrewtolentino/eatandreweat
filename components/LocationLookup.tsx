@@ -17,12 +17,15 @@ export function LocationLookup({
   hint,
   /** Offer a "near me" search. On for adding somewhere you are standing in. */
   offerNearby = false,
+  /** What the search button says. Two lookups on one form need to differ. */
+  label = "Search everywhere",
 }: {
   /** What to search for. Empty disables the button. */
   query: string;
   onPick: (hit: GeocodeHit) => void;
   hint?: string;
   offerNearby?: boolean;
+  label?: string;
 }) {
   const [hits, setHits] = useState<GeocodeHit[] | null>(null);
   const [busy, setBusy] = useState(false);
@@ -58,7 +61,7 @@ export function LocationLookup({
           disabled={busy || locating || !query.trim()}
           className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-surface-hover disabled:opacity-50"
         >
-          {busy && !locating ? "Looking…" : "Search everywhere"}
+          {busy && !locating ? "Looking…" : label}
         </button>
         {hint && <span className="text-xs text-muted">{hint}</span>}
       </div>
