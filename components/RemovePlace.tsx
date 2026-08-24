@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { supabase, isPermissionDenied } from "@/lib/supabase";
-import { forgetPlacePhoto } from "@/lib/photos";
+import { forgetPlacePhotos } from "@/lib/photos";
 import type { PlaceWithVerdict } from "@/lib/usePlaces";
 
 /**
@@ -58,12 +58,12 @@ export function RemovePlace({
   async function destroy() {
     setBusy(true);
     setError(null);
-    // Storage lives outside Postgres and nothing cascades to it, so the photo
-    // has to be swept explicitly — and only once the row naming it is gone.
-    const photo = place.photo_path;
+    // Storage lives outside Postgres and nothing cascades to it, so the photos
+    // have to be swept explicitly — and only once the row naming them is gone.
+    const photos = place.photo_paths;
     const { error } = await supabase.from("places").delete().eq("id", place.id);
     if (report(error)) {
-      forgetPlacePhoto(photo);
+      forgetPlacePhotos(photos);
       onRemoved();
     }
   }
@@ -114,7 +114,7 @@ export function RemovePlace({
         <div className="rounded-md border border-danger/40 p-2.5">
           <p className="text-xs">
             Delete permanently? This erases the place
-            {hasReview && ", its review"} and any photo. It cannot be undone.
+            {hasReview && ", its review"} and any photos. It cannot be undone.
           </p>
           <div className="mt-2 flex gap-2">
             <button

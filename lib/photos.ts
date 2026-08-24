@@ -28,13 +28,37 @@ export async function uploadPlacePhoto(
 }
 
 /**
- * Best-effort cleanup after a photo is replaced or a write-up is cleared.
+ * Upload several at once, in the order given.
+ *
+ * Sequential rather than parallel: these come off a phone at several megabytes
+ * each, and a handful of simultaneous uploads on a restaurant's wifi is how you
+ * get a timeout instead of a photo. Stops at the first failure and reports what
+ * did land, so a partial batch is still saveable.
+ */
+export async function uploadPlacePhotos(
+  placeId: string,
+  files: File[],
+): Promise<{ paths: string[]; error?: string }> {
+  const paths: string[] = [];
+
+  for (const file of files) {
+    const result = await uploadPlacePhoto(placeId, file);
+    if ("error" in result) return { paths, error: result.error };
+    paths.push(result.path);
+  }
+
+  return { paths };
+}
+
+/**
+ * Best-effort cleanup after photos are removed or a write-up is cleared.
  *
  * Deliberately not awaited for correctness: the row has already been updated to
- * stop pointing at this file, so a failed delete leaves an orphan in the bucket
- * rather than a broken image on the page. Not worth failing a save over.
+ * stop pointing at these files, so a failed delete leaves an orphan in the
+ * bucket rather than a broken image on the page. Not worth failing a save over.
  */
-export function forgetPlacePhoto(path: string | null): void {
-  if (!path) return;
-  void supabase.storage.from(BUCKET).remove([path]);
+export function forgetPlacePhotos(paths: (string | null)[]): void {
+  const real = paths.filter((p): p is string => Boolean(p));
+  if (real.length === 0) return;
+  void supabase.storage.from(BUCKET).remove(real);
 }

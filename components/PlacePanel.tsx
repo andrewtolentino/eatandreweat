@@ -105,14 +105,32 @@ export function PlacePanel({
             {place.been ? "Been, not written up yet." : "Not been yet."}
           </p>
         )}
-        {place.photo_path && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={publicPhotoUrl(place.photo_path)}
-            alt={place.name}
-            loading="lazy"
-            className="mt-3 w-full rounded-md border border-border"
-          />
+        {place.photo_paths.length > 0 && (
+          // One up, the rest in a grid beneath: the first photo is usually the
+          // one worth seeing large, and a uniform grid of six would bury it.
+          <div className="mt-3 flex flex-col gap-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={publicPhotoUrl(place.photo_paths[0])}
+              alt={place.name}
+              loading="lazy"
+              className="w-full rounded-md border border-border"
+            />
+            {place.photo_paths.length > 1 && (
+              <div className="grid grid-cols-3 gap-2">
+                {place.photo_paths.slice(1).map((path) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={path}
+                    src={publicPhotoUrl(path)}
+                    alt={place.name}
+                    loading="lazy"
+                    className="aspect-square w-full rounded-md border border-border object-cover"
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </section>
 

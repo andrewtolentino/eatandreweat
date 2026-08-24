@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { supabase, isPermissionDenied } from "@/lib/supabase";
-import { forgetPlacePhoto, uploadPlacePhoto } from "@/lib/photos";
+import { forgetPlacePhotos, publicPhotoUrl, uploadPlacePhotos } from "@/lib/photos";
 import type { PlaceWithVerdict } from "@/lib/usePlaces";
 
 function today(): string {
@@ -38,8 +38,10 @@ export function ReviewForm({
   const [again, setAgain] = useState<boolean | null>(place.again);
   const [review, setReview] = useState(place.review ?? "");
   const [visitedOn, setVisitedOn] = useState(place.visited_on ?? today());
-  const [file, setFile] = useState<File | null>(null);
-  const [dropPhoto, setDropPhoto] = useState(false);
+  // Existing photos you have chosen to keep, plus new files not yet uploaded.
+  // Removal is staged rather than immediate so Cancel really cancels.
+  const [keptPhotos, setKeptPhotos] = useState<string[]>(place.photo_paths);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,7 +61,7 @@ export function ReviewForm({
           been: false,
           again: null,
           review: null,
-          photo_path: null,
+          photo_paths: [],
           visited_on: null,
           to_order: toOrder.trim() || null,
         })
@@ -70,21 +72,27 @@ export function ReviewForm({
         setError(clearError.message);
         return;
       }
-      forgetPlacePhoto(place.photo_path);
+      forgetPlacePhotos(place.photo_paths);
       onSaved();
       return;
     }
 
-    let photoPath = dropPhoto ? null : place.photo_path;
+    let photoPaths = keptPhotos;
 
-    if (file) {
-      const uploaded = await uploadPlacePhoto(place.id, file);
-      if ("error" in uploaded) {
+    if (newFiles.length > 0) {
+      const uploaded = await uploadPlacePhotos(place.id, newFiles);
+      photoPaths = [...keptPhotos, ...uploaded.paths];
+
+      if (uploaded.error) {
         setBusy(false);
-        setError(`Photo upload failed: ${uploaded.error}`);
+        setError(
+          `${uploaded.paths.length} of ${newFiles.length} photos uploaded, then: ${uploaded.error}. Save again to keep the ones that worked.`,
+        );
+        // Keep what landed so a retry does not re-upload them.
+        setKeptPhotos(photoPaths);
+        setNewFiles([]);
         return;
       }
-      photoPath = uploaded.path;
     }
 
     const { error: saveError } = await supabase
@@ -94,7 +102,7 @@ export function ReviewForm({
         again,
         review: review.trim() || null,
         to_order: toOrder.trim() || null,
-        photo_path: photoPath,
+        photo_paths: photoPaths,
         visited_on: visitedOn || null,
       })
       .eq("id", place.id);
@@ -110,8 +118,8 @@ export function ReviewForm({
       return;
     }
 
-    // Only once the row has stopped pointing at it.
-    if (photoPath !== place.photo_path) forgetPlacePhoto(place.photo_path);
+    // Only once the row has stopped pointing at them.
+    forgetPlacePhotos(place.photo_paths.filter((p) => !photoPaths.includes(p)));
     onSaved();
   }
 
@@ -209,57 +217,75 @@ export function ReviewForm({
                 className={FIELD}
               />
             </div>
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <span className="text-xs font-medium">Photo</span>
-              {/* The native file input renders its own button at its own
-                  height, so it never lines up with the date field beside it.
-                  Hide it and drive it from a label styled to match. */}
-              <label
-                htmlFor={`photo-${place.id}`}
-                className="flex h-9 w-full cursor-pointer items-center truncate rounded-md border border-border bg-background px-3 text-sm text-muted hover:border-accent"
-              >
-                <span className="truncate">
-                  {file
-                    ? file.name
-                    : place.photo_path && !dropPhoto
-                      ? "Replace photo"
-                      : "Choose photo"}
-                </span>
-              </label>
-              <input
-                id={`photo-${place.id}`}
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  setFile(e.target.files?.[0] ?? null);
-                  setDropPhoto(false);
-                }}
-                className="sr-only"
-              />
-            </div>
           </div>
 
-          {place.photo_path && !file && !dropPhoto && (
-            <button
-              type="button"
-              onClick={() => setDropPhoto(true)}
-              className="self-start text-xs text-muted underline underline-offset-2 hover:text-foreground"
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-medium">
+              Photos{" "}
+              <span className="text-muted">
+                — the food, the room, whatever you took
+              </span>
+            </span>
+
+            {(keptPhotos.length > 0 || newFiles.length > 0) && (
+              <ul className="flex flex-wrap gap-2">
+                {keptPhotos.map((path) => (
+                  <li key={path} className="relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={publicPhotoUrl(path)}
+                      alt=""
+                      className="size-16 rounded-md border border-border object-cover"
+                    />
+                    <button
+                      type="button"
+                      aria-label="Remove this photo"
+                      onClick={() =>
+                        setKeptPhotos((current) =>
+                          current.filter((p) => p !== path),
+                        )
+                      }
+                      className="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full border border-border bg-surface text-xs shadow-sm hover:bg-surface-hover"
+                    >
+                      ✕
+                    </button>
+                  </li>
+                ))}
+                {newFiles.map((f, i) => (
+                  <li
+                    key={`${f.name}-${i}`}
+                    className="flex size-16 items-center justify-center rounded-md border border-dashed border-border p-1 text-center text-[10px] break-all text-muted"
+                  >
+                    {f.name.slice(0, 22)}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <label
+              htmlFor={`photos-${place.id}`}
+              className="flex h-9 w-full cursor-pointer items-center justify-center rounded-md border border-dashed border-border text-sm text-muted hover:border-accent hover:text-foreground"
             >
-              Remove the photo
-            </button>
-          )}
-          {dropPhoto && (
-            <p className="text-xs text-muted">
-              Photo will be removed when you save.{" "}
-              <button
-                type="button"
-                onClick={() => setDropPhoto(false)}
-                className="underline underline-offset-2 hover:text-foreground"
-              >
-                Keep it
-              </button>
-            </p>
-          )}
+              {newFiles.length > 0
+                ? `${newFiles.length} to upload — add more`
+                : "Add photos"}
+            </label>
+            <input
+              id={`photos-${place.id}`}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) => {
+                // Appended, not replaced: picking a second time on a phone is
+                // usually "and these too", not "actually, these instead".
+                const picked = Array.from(e.target.files ?? []);
+                setNewFiles((current) => [...current, ...picked]);
+                e.target.value = "";
+              }}
+              className="sr-only"
+            />
+          </div>
+
         </>
       ) : place.been ? (
         <p className="text-xs text-muted">

@@ -27,7 +27,8 @@ export type Place = {
   review: string | null;
   /** What to get. Free text — "the pot pie, and the Double Down for the bit". */
   to_order: string | null;
-  photo_path: string | null;
+  /** Display order is array order; new photos append. */
+  photo_paths: string[];
   visited_on: string | null;
   lat: number;
   lng: number;
