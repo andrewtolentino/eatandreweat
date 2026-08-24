@@ -118,10 +118,10 @@ export function PlacePanel({
             />
             {place.photo_paths.length > 1 && (
               <div className="grid grid-cols-3 gap-2">
-                {place.photo_paths.slice(1).map((path) => (
+                {place.photo_paths.slice(1).map((path, i) => (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    key={path}
+                    key={`${path}-${i}`}
                     src={publicPhotoUrl(path)}
                     alt={place.name}
                     loading="lazy"

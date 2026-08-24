@@ -3,9 +3,9 @@
 import { placeWhere } from "@/lib/database.types";
 import { categoryLabel } from "@/lib/categories";
 import { formatDate } from "@/lib/format";
-import { publicPhotoUrl } from "@/lib/photos";
 import type { PlaceWithVerdict } from "@/lib/usePlaces";
 import { VerdictChip } from "./VerdictChip";
+import { PhotoStrip } from "./PhotoStrip";
 
 /**
  * The front page: places you have been, newest first.
@@ -67,26 +67,13 @@ export function Feed({
                    right-hand side above it, stretched to whatever height the
                    text needs. On the right so that every card — photo or not —
                    starts its text at the same left edge, which is what makes a
-                   column of them scan as one list.
-
-                   Height rather than aspect ratio: at 3:2 the photo scaled with
-                   the column and ran to ~460px in the desktop feed. */
-                <div className="relative sm:order-last sm:w-48 sm:shrink-0 sm:self-stretch lg:w-60">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={publicPhotoUrl(place.photo_paths[0])}
-                    alt={place.name}
-                    loading="lazy"
-                    className="h-56 w-full object-cover sm:h-full"
-                  />
-                  {/* The card shows one; the rest are in the panel. A count
-                      says they exist without turning the feed into a gallery. */}
-                  {place.photo_paths.length > 1 && (
-                    <span className="absolute right-2 bottom-2 rounded-full bg-foreground/75 px-2 py-0.5 text-[11px] font-medium text-background">
-                      +{place.photo_paths.length - 1}
-                    </span>
-                  )}
-                </div>
+                   column of them scan as one list. */
+                <PhotoStrip
+                  paths={place.photo_paths}
+                  alt={place.name}
+                  onOpen={() => onSelect(place)}
+                  className="sm:order-last sm:w-48 sm:shrink-0 sm:self-stretch lg:w-60"
+                />
               )}
 
               <div className="min-w-0 p-5 sm:flex-1">

@@ -107,6 +107,31 @@ body {
 }
 
 /*
+ * iOS Safari zooms the whole page when you focus a field whose text is under
+ * 16px, and does not zoom back out afterwards — you end up panning a
+ * two-thirds-visible form with your thumb. The usual "fix" is maximum-scale=1
+ * on the viewport, which also takes pinch-zoom away from everyone who needs it.
+ * Meeting the threshold instead costs nothing but a slightly larger field on a
+ * phone, which is the right size on a phone anyway.
+ */
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* Swipeable strips should not also show a scrollbar. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/*
  * Text that sits *in* a row of pills — a date, a status label — without being
  * one. Same box as .pill so the glyphs share its optical centre line, minus the
  * border, padding and radius.
