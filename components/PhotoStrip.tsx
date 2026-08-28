@@ -22,11 +22,23 @@ export function PhotoStrip({
   alt,
   onOpen,
   className = "",
+  fit = "cover",
 }: {
   paths: string[];
   alt: string;
-  onOpen: () => void;
+  /** Given the photo currently in view, so a viewer can open on the same one. */
+  onOpen: (index: number) => void;
   className?: string;
+  /**
+   * "cover" fills the box and crops — right for the feed, where a column of
+   * ragged letterboxed images reads as broken and the picture is an
+   * illustration.
+   *
+   * "contain" shows the whole photo — right for the panel, where you have gone
+   * looking at it. Phone photos are usually portrait, and cropping those to a
+   * short landscape box takes the top and bottom off the subject.
+   */
+  fit?: "cover" | "contain";
 }) {
   const scroller = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -59,7 +71,7 @@ export function PhotoStrip({
       <div
         ref={scroller}
         onScroll={onScroll}
-        onClick={onOpen}
+        onClick={() => onOpen(index)}
         className="no-scrollbar flex h-full snap-x snap-mandatory overflow-x-auto"
       >
         {paths.map((path, i) => (
@@ -72,7 +84,11 @@ export function PhotoStrip({
             src={publicPhotoUrl(path)}
             alt={alt}
             loading="lazy"
-            className="h-56 w-full shrink-0 snap-center object-cover sm:h-full"
+            className={
+              fit === "contain"
+                ? "h-full w-full shrink-0 snap-center object-contain"
+                : "h-56 w-full shrink-0 snap-center object-cover sm:h-full"
+            }
           />
         ))}
       </div>

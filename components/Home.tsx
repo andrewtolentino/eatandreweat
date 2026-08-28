@@ -18,6 +18,7 @@ import { PlacePanel } from "./PlacePanel";
 import { SuggestForm } from "./SuggestForm";
 import { SuggestionsQueue } from "./SuggestionsQueue";
 import { QuickAdd } from "./QuickAdd";
+import { PhotoLightbox } from "./PhotoLightbox";
 
 /** Two states, so the key is two swatches. */
 const LEGEND: PinState[] = ["been", "want"];
@@ -68,6 +69,9 @@ export function Home({ year }: { year: number }) {
   const [hoverId, setHover] = useSettledHover();
   const [mapExpanded, setMapExpanded] = useState(false);
   const [overlay, setOverlay] = useState<null | "suggest" | "queue" | "add">(null);
+  const [lightbox, setLightbox] = useState<{ paths: string[]; at: number } | null>(
+    null,
+  );
 
   // Held by id rather than by object: reload() builds fresh place objects, and
   // a drawer holding the old one would keep showing a stale write-up after an
@@ -110,13 +114,16 @@ export function Home({ year }: { year: number }) {
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (event.key !== "Escape") return;
-      if (overlay) setOverlay(null);
+      // Innermost first, or Escape would close the panel out from under the
+      // photo viewer sitting on top of it.
+      if (lightbox) setLightbox(null);
+      else if (overlay) setOverlay(null);
       else if (selectedId) setSelectedId(null);
       else if (mapExpanded) setMapExpanded(false);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [overlay, selectedId, mapExpanded]);
+  }, [lightbox, overlay, selectedId, mapExpanded]);
 
   return (
     // A column at least as tall as the viewport, with the main region growing
@@ -298,8 +305,18 @@ export function Home({ year }: { year: number }) {
               setSelectedId(null);
               reload();
             }}
+            onViewPhotos={(paths, at) => setLightbox({ paths, at })}
           />
         </>
+      )}
+
+      {lightbox && (
+        <PhotoLightbox
+          paths={lightbox.paths}
+          startAt={lightbox.at}
+          alt={selected?.name ?? ""}
+          onClose={() => setLightbox(null)}
+        />
       )}
 
       {overlay && (

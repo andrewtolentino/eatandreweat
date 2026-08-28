@@ -6,9 +6,9 @@ import { useAuth } from "@/lib/useAuth";
 import { placeWhere } from "@/lib/database.types";
 import { categoryLabel } from "@/lib/categories";
 import { formatDate } from "@/lib/format";
-import { publicPhotoUrl } from "@/lib/photos";
 import { PIN_LABELS } from "@/lib/verdict";
 import { PinDot } from "./PinDot";
+import { PhotoStrip } from "./PhotoStrip";
 import { VerdictChip } from "./VerdictChip";
 import { CategoryEditor } from "./CategoryEditor";
 import { ReviewForm } from "./ReviewForm";
@@ -20,9 +20,12 @@ export function PlacePanel({
   onClose,
   onChanged,
   onRemoved,
+  onViewPhotos,
 }: {
   place: PlaceWithVerdict;
   onClose: () => void;
+  /** Opens the full-screen viewer. Lives in Home so Escape can order itself. */
+  onViewPhotos: (paths: string[], startAt: number) => void;
   /** Refetches the map, so a pin fills in the moment a review is saved. */
   onChanged: () => void;
   /** The place is gone — refetch *and* close, since there is nothing to show. */
@@ -106,31 +109,20 @@ export function PlacePanel({
           </p>
         )}
         {place.photo_paths.length > 0 && (
-          // One up, the rest in a grid beneath: the first photo is usually the
-          // one worth seeing large, and a uniform grid of six would bury it.
-          <div className="mt-3 flex flex-col gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={publicPhotoUrl(place.photo_paths[0])}
-              alt={place.name}
-              loading="lazy"
-              className="w-full rounded-md border border-border"
-            />
-            {place.photo_paths.length > 1 && (
-              <div className="grid grid-cols-3 gap-2">
-                {place.photo_paths.slice(1).map((path, i) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={`${path}-${i}`}
-                    src={publicPhotoUrl(path)}
-                    alt={place.name}
-                    loading="lazy"
-                    className="aspect-square w-full rounded-md border border-border object-cover"
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+          // The same swipeable strip the cards use, so photos behave the same
+          // way everywhere — and tapping one opens it full screen, since 26rem
+          // is not a size at which you can actually look at a photograph.
+          <PhotoStrip
+            paths={place.photo_paths}
+            alt={place.name}
+            fit="contain"
+            onOpen={(i) => onViewPhotos(place.photo_paths, i)}
+            /* Portrait-leaning box, since phone photos are: a 4:5 frame holds a
+               vertical shot almost exactly, and letterboxes a landscape one
+               rather than beheading a portrait one. Nothing is cropped either
+               way — contain is what makes that true. */
+            className="mt-3 aspect-4/5 overflow-hidden rounded-md border border-border bg-surface-hover"
+          />
         )}
       </section>
 
